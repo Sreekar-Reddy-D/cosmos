@@ -1,59 +1,83 @@
-// segment_tree.cpp
-// Basic Segment Tree for range sum and point updates
+#include <iostream>
+#include <vector>
 
-#include <bits/stdc++.h>
-using namespace std;
+class SegmentTree {
+public:
+    SegmentTree(const std::vector<int>& data);
 
-const int N = 1e5;
-int seg[4 * N], a[N];
+    void update(int index, int value);
+    int query(int left, int right);
 
-// Build the segment tree
-void build(int l, int r, int idx) {
-    if (l == r) {
-        seg[idx] = a[l];
-        return;
-    }
-    int mid = (l + r) / 2;
-    build(l, mid, 2 * idx);
-    build(mid + 1, r, 2 * idx + 1);
-    seg[idx] = seg[2 * idx] + seg[2 * idx + 1];
+private:
+    void build(int node, int start, int end);
+    void updateUtil(int node, int start, int end, int index, int value);
+    int queryUtil(int node, int start, int end, int left, int right);
+
+    int size_;
+    std::vector<int> tree_;
+    std::vector<int> data_;
+};
+
+SegmentTree::SegmentTree(const std::vector<int>& data)
+    : size_{static_cast<int>(data.size())}, tree_(4 * size_), data_{data} {
+    build(1, 0, size_ - 1);
 }
 
-// Point update: a[pos] += val
-void update(int l, int r, int idx, int pos, int val) {
-    if (l == r) {
-        seg[idx] += val;
-        return;
+void SegmentTree::build(int node, int start, int end) {
+    if (start == end) {
+        tree_[node] = data_[start];
+    } else {
+        int mid = (start + end) / 2;
+        build(2 * node, start, mid);
+        build(2 * node + 1, mid + 1, end);
+        tree_[node] = tree_[2 * node] + tree_[2 * node + 1];
     }
-    int mid = (l + r) / 2;
-    if (pos <= mid)
-        update(l, mid, 2 * idx, pos, val);
-    else
-        update(mid + 1, r, 2 * idx + 1, pos, val);
-    seg[idx] = seg[2 * idx] + seg[2 * idx + 1];
 }
 
-// Query sum in range [ql, qr]
-int query(int l, int r, int idx, int ql, int qr) {
-    if (qr < l || ql > r)
+void SegmentTree::update(int index, int value) {
+    updateUtil(1, 0, size_ - 1, index, value);
+}
+
+void SegmentTree::updateUtil(int node, int start, int end, int index, int value) {
+    if (start == end) {
+        data_[index] = value;
+        tree_[node] = value;
+    } else {
+        int mid = (start + end) / 2;
+        if (index <= mid) {
+            updateUtil(2 * node, start, mid, index, value);
+        } else {
+            updateUtil(2 * node + 1, mid + 1, end, index, value);
+        }
+        tree_[node] = tree_[2 * node] + tree_[2 * node + 1];
+    }
+}
+
+int SegmentTree::query(int left, int right) {
+    return queryUtil(1, 0, size_ - 1, left, right);
+}
+
+int SegmentTree::queryUtil(int node, int start, int end, int left, int right) {
+    if (right < start || end < left) {
         return 0;
-    if (ql <= l && r <= qr)
-        return seg[idx];
-    int mid = (l + r) / 2;
-    return query(l, mid, 2 * idx, ql, qr) + query(mid + 1, r, 2 * idx + 1, ql, qr);
+    }
+    if (left <= start && end <= right) {
+        return tree_[node];
+    }
+
+    int mid = (start + end) / 2;
+    int sumLeft = queryUtil(2 * node, start, mid, left, right);
+    int sumRight = queryUtil(2 * node + 1, mid + 1, end, left, right);
+    return sumLeft + sumRight;
 }
 
 int main() {
-    int n = 6;
-    int arr[] = {1, 3, 5, 7, 9, 11};
-    for (int i = 0; i < n; ++i)
-        a[i] = arr[i];
+    std::vector<int> data{1, 3, 5, 7, 9, 11};
+    SegmentTree st(data);
 
-    build(0, n - 1, 1);
-
-    cout << "Sum of range [1, 3]: " << query(0, n - 1, 1, 1, 3) << endl;
-    update(0, n - 1, 1, 1, 10);  // a[1] += 10
-    cout << "After update, sum of range [1, 3]: " << query(0, n - 1, 1, 1, 3) << endl;
+    std::cout << "Sum [1, 3]: " << st.query(1, 3) << "\n";
+    st.update(1, 10);
+    std::cout << "Sum [1, 3] after update: " << st.query(1, 3) << "\n";
 
     return 0;
 }
