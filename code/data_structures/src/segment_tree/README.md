@@ -1,51 +1,32 @@
 # Segment Tree
 
-A **Segment Tree** is a binary tree used for efficient range queries and updates on arrays.
+A **Segment Tree** is a binary tree used for answering **range queries** (like sum, min, max) and performing **point or range updates** efficiently in logarithmic time.
 
-This folder contains:
-- Basic Segment Tree implementation
-- Segment Tree with Lazy Propagation (for range updates)
+## Variants
 
----
-
-## Files
-
-| File                        | Description                                       |
-|----------------------------|---------------------------------------------------|
-| `segment_tree.cpp`         | Point updates and range sum queries               |
-| `segment_tree_lazy.cpp`    | Supports range updates using lazy propagation     |
-
----
-
-## Supported Operations
-
-### `segment_tree.cpp`
-- Build from array
-- Point update
-- Range sum query
-
-### `segment_tree_lazy.cpp`
-- Build from array
-- **Range update**
-- Range sum query with **lazy propagation**
-
----
+- `segment_tree.cpp`: Basic segment tree supporting range sum queries and point updates.
+- `segment_tree_lazy.cpp`: Segment tree with **lazy propagation** to support range updates efficiently.
 
 ## Time Complexity
 
-| Operation         | Time       |
-|------------------|------------|
-| Build Tree       | O(n)       |
-| Point Update     | O(log n)   |
-| Range Query      | O(log n)   |
-| Range Update     | O(log n) *(with lazy)* |
+| Operation     | Basic Segment Tree | With Lazy Propagation |
+|---------------|--------------------|------------------------|
+| Build         | O(N)               | O(N)                   |
+| Point Update  | O(log N)           | O(log N)               |
+| Range Query   | O(log N)           | O(log N)               |
+| Range Update  | N/A                | O(log N)               |
 
----
+Where `N` is the size of the input array.
 
-## Sample Usage (from `main()`)
+## Sample Usage
 
 ```cpp
-int arr[] = {1, 3, 5, 7, 9, 11};
-build(0, 5, 1);          // Builds segment tree
-cout << query(1, 3, 1);  // Queries sum in range [1, 3]
-update(1, 10, 1, 3, 0);  // Range update in segment_tree_lazy.cpp
+// Basic segment tree
+SegmentTree st(data);
+st.update(index, value);
+st.query(left, right);
+
+// Segment tree with lazy propagation
+SegmentTreeLazy st(data);
+st.updateRange(left, right, delta);
+st.queryRange(left, right);
